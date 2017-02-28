@@ -6,15 +6,13 @@
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.9.473"]
                  [org.clojure/tools.cli "0.3.5"]
-
-                 ;; https://github.com/ptaoussanis/encore/blob/master/DEP-CONFLICT.md
-                 [com.taoensso/sente "1.11.0"] ; websockets, keep above e85th commons because of dependency issue with encore
                  [com.taoensso/timbre "4.7.4"]
                  [e85th/commons "0.1.6"]
                  [e85th/backend "0.1.16" :exclusions [[com.google.guava/guava-jdk5]]]
                  [e85th/ui "0.1.14"]
                  [prismatic/schema "1.1.2"]
                  [twitter-api "1.8.0"]
+                 [com.twitter/twitter-text "1.6.1"]
 
                  [http-kit "2.2.0"]
 
@@ -23,8 +21,6 @@
 
                  [enlive "1.1.6"] ; html transforms
                  [org.jsoup/jsoup "1.8.3"] ; for use with enlive
-
-                 [com.andrewmcveigh/cljs-time "0.4.0"]
                  [re-frame "0.8.0"]
                  [day8.re-frame/http-fx "0.0.4"]
                  [reagent "0.6.0"]
@@ -32,12 +28,7 @@
 
                  [funcool/hodgepodge "0.1.4"] ;; local storage
                  [aero "1.0.0"]
-
-                 [kibu/pushy "0.3.6"] ;; clean url using html5 pushState
-                 [bidi "2.0.16"] ;; client site routing
-                 [kioo "0.4.2"]
-
-                 [cljs-ajax "0.5.8"]]
+                 [kioo "0.4.2"]]
 
 
   :source-paths ["src"]

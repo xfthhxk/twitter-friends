@@ -1,36 +1,19 @@
 (ns tf.main
-  (:require [taoensso.timbre :as log]
-            [tf.common.data :as data]
-            [re-frame.core :as rf]
-                                        ;[re-frisk.core :as re-frisk]
+  "UI entry point into the application."
+  (:require [tf.common.data :as data]
+            [tf.views :as v]
             [schema.core :as s]
             [reagent.core :as reagent]
-            [tf.net.api :as api]
-            [day8.re-frame.http-fx]
-            [hodgepodge.core :as hp]
-            [tf.events :as e]
-            [tf.views :as v]
-            [tf.routes :as routes]
-            [e85th.ui.rf.fx]
-            [e85th.ui.util :as u]
-            [e85th.ui.edn-io]))
+            [day8.re-frame.http-fx] ; loads and makes http-xhrio handler available
+            [e85th.ui.rf.fx] ; loads and makes re-frame fx handlers available
+            [e85th.ui.edn-io] ; loads support for application/edn content type
+            [e85th.ui.util :as u]))
 
-
-(def name->component
-  {"main" [v/main-panel]})
-
-(defn mount-root!
-  [nm]
-  (reagent/render (get name->component nm [:h2 "TF: Unknown component"])
-                  (u/element-by-id "app")))
 
 (defn init
   []
-  ;; FIXME: need a configurable way to set this
   (s/set-fn-validation! true)
   (data/set-api-host! js/window.location.origin)
-  (routes/init!)
-  (let [nm (u/element-value "init-component")]
-    (mount-root! nm)))
+  (reagent/render [v/main-panel] (u/element-by-id "app")))
 
 (set! (.-onload js/window) init)

@@ -28,7 +28,14 @@ A user's followers and people she follows are likely very similar.  However,
 the API has limits on data access so checking every follower is not possible.
 Get data using search.
 
+TODO
+* Score results and order by them
+
 FIXME
+
+* People who don't use hashtags, need to look at user description
+* If no description look at most frequent words and search for that.
+* Handle exceptions for when the handle does not exist.
 
 ## License
 

@@ -1,24 +1,19 @@
 (ns tf.events
+  "re-frame event handlers. These functions return data, it is actually re-frame that
+   forces the side-effects to occur."
   (:require [taoensso.timbre :as log]
-            [schema.core :as s]
             [tf.net.api :as api]
-            [tf.data-keys :as dk]
-            [e85th.ui.rf.sweet :refer-macros [def-event-db def-event-fx def-db-change]]
-            [e85th.ui.util :as u]
-            [re-frame.core :as rf]))
+            [tf.db-keys :as dk]
+            [e85th.ui.rf.sweet :refer-macros [def-event-db def-event-fx def-db-change]]))
 
-(def-db-change set-main-view dk/main-view)
 (def-db-change current-handle-changed dk/current-handle)
 
-(def-event-db autocomplete
-  [db [_ x]]
-  (log/info x)
-  db)
-
-(def-event-db rpc-err
-  [db [_ err]]
-  (log/warn err)
-  db)
+;; NB. :notify fx uses toastr.js to display an error falling back to js/alert.
+(def-event-fx fetch-friends-err
+  [{:keys [db] :as cofx} event-v]
+  (log/warnf "rpc err: %s" event-v)
+  {:db (assoc-in db dk/busy? false)
+   :notify [:alert {:message "Error fetching friends."}]})
 
 (def-event-db fetch-friends-ok
   [db [_ friends]]
@@ -29,6 +24,6 @@
 (def-event-fx fetch-friends
   [{:keys [db]} _]
   (let [handle (get-in db dk/current-handle)]
-    (log/infof "fetch-friends for handle: %s" handle)
+    (log/debugf "fetch-friends for handle: %s" handle)
     {:db (assoc-in db dk/busy? true)
-     :http-xhrio (api/fetch-friends handle fetch-friends-ok [rpc-err ::fetch-friends-err])}))
+     :http-xhrio (api/fetch-friends handle fetch-friends-ok fetch-friends-err)}))

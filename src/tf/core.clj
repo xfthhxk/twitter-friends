@@ -19,12 +19,17 @@
   (let [{:keys [screen_name profile_image_url_https]} (get-in tweet [:user])]
     {:twitter.user/handle screen_name
      :twitter.user/photo-url profile_image_url_https
-     :twitter.user/friend-score 0}))
+     :twitter.user/friend-score 0
+     :twitter.user/twitter-page (str "https://twitter.com/" screen_name)}))
 
 (s/defn extract-hashtags :- [s/Str]
   [tweet]
   (->> (get-in tweet [:entities :hashtags])
        (map :text)))
+
+(s/defn extract-user-description :- [s/Str]
+  [tweet]
+  (get-in tweet [:user :description]))
 
 (s/defn tweets->hashtag-frequencies
   [tweets]
