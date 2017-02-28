@@ -1,0 +1,5 @@
+;; File is read using aero see https://github.com/juxt/aero
+{:secrets #include "/etc/twitter-friends/secrets.edn"
+ :log-file #profile {:dev "./log/twitter-friends.log"
+                     :default "/var/log/twitter-friends/twitter-friends.log"}
+ :twitter-creds ^:ref [:secrets :twitter-creds]}
