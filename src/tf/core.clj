@@ -1,8 +1,14 @@
 (ns tf.core
   (:require [tf.models :as m]
+            [tf.tweet :as tweet]
             [twitter.api.restful :as twitter]
             [schema.core :as s]
+            [e85th.commons.util :as u]
             [clojure.string :as str]))
+
+
+;; use my term-frequencies as the weights
+;; for each user determine word-frequencies for all tweets
 
 (s/defn get-user-tweets
   [{:keys [twitter-creds] :as res} handle :- s/Str]
@@ -14,59 +20,46 @@
   (let [result (twitter/search-tweets :oauth-creds twitter-creds :params {:q query})]
     (get-in result [:body :statuses])))
 
-(s/defn extract-user-info
-  [tweet]
-  (let [{:keys [screen_name profile_image_url_https]} (get-in tweet [:user])]
-    {:twitter.user/handle screen_name
-     :twitter.user/photo-url profile_image_url_https
-     :twitter.user/friend-score 0
-     :twitter.user/twitter-page (str "https://twitter.com/" screen_name)}))
-
-(s/defn extract-hashtags :- [s/Str]
-  [tweet]
-  (->> (get-in tweet [:entities :hashtags])
-       (map :text)))
-
-(s/defn extract-user-description :- [s/Str]
-  [tweet]
-  (get-in tweet [:user :description]))
-
-(s/defn tweets->hashtag-frequencies
-  [tweets]
-  (-> (map extract-hashtags tweets) flatten frequencies))
-
-(s/defn top-hashtags
-  "From a set of tweets extracts and returns the most popular hashtags in order."
-  [tweets]
-  (let [negate (partial * -1)]
-    ;; this can be made more efficient esp reverse if sort-by did the right thing
-    (->> tweets
-         (tweets->hashtag-frequencies)
-         (sort-by (comp negate second))
-         (map first))))
-
-(def get-top-hashtags
-  (comp top-hashtags get-user-tweets))
-
-(defn hashtags->search-clause
-  [tags]
+(s/defn hashtags->search-clause
+  [tags :- [s/Str]]
   (let [as-hashtag (partial str "#")]
     (str/join " OR " (map as-hashtag tags))))
 
-;(hashtags->search-clause ["a" "b" "c"])
+(s/defn handle-counts :- {s/Str s/Int}
+  "Returns a map of handle to count of that handle."
+  [friends]
+  (u/group-by+ :twitter.user/handle identity count friends))
 
-;; Takes a tweet and returns a tuple [Friend [s/Str]]
-(def tweet->user+tags (juxt extract-user-info extract-hashtags))
+(s/defn score-word-frequencies
+  [word->weight word->freq]
+  (->> (u/intersect-with * word->weight word->freq)
+       vals
+       (reduce +)))
 
+(s/defn score-search-results :- {s/Str s/Num}
+  "ref-tweets are all by the same user. Answers with handle->score.
+   Higher score indicates greater similarity."
+  [ref-tweets found-tweets]
+  (let [word->weight (tweet/combined-term-frequencies ref-tweets)
+        handle->word->freq (tweet/word-frequencies-by-user-handle found-tweets)]
+    (reduce (fn [m [handle word->freq]]
+              (assoc m handle (score-word-frequencies word->weight word->freq)))
+            {}
+            handle->word->freq)))
 
 (s/defn find-friends :- [m/Friend]
   [{:keys [twitter-creds] :as res} handle :- s/Str]
   (let [tweets (get-user-tweets res handle)
-        hashtags (top-hashtags tweets)
+        hashtags (tweet/top-hashtags tweets)
         search-clause (hashtags->search-clause (take 5 hashtags))
         results (get-tweet-search-results res search-clause)
-        all-user+tags (map tweet->user+tags results)]
-    (map first all-user+tags))
+        handle->user-info (u/group-by+ tweet/user-handle tweet/user-info first results)
+        handle->score (score-search-results tweets results)
+        handle->user-info (reduce (fn [m [handle score]]
+                                    (assoc-in m [handle :twitter.user/friend-score] score))
+                                  handle->user-info
+                                  handle->score)]
+    (sort-by :twitter.user/friend-score (vals handle->user-info)))
 
   ;; get messages for user with handle
   ;; find most relevant hashtags in tweets

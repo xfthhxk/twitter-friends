@@ -36,6 +36,7 @@ FIXME
 * People who don't use hashtags, need to look at user description
 * If no description look at most frequent words and search for that.
 * Handle exceptions for when the handle does not exist.
+* Duplicate users returned by twitter search, so aggregate them into score.
 
 ## License
 
