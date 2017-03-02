@@ -12,9 +12,6 @@
 (def max-search-terms 5)
 (def default-search-term "#friends")
 
-;; use my term-frequencies as the weights
-;; for each user determine word-frequencies for all tweets
-
 (s/defn get-user-tweets
   "Makes an API call to Twitter to fetch tweets (user timeline) for
    the requested handle. Answers with the tweets."
@@ -85,7 +82,7 @@
           handle->user-info
           handle->score))
 
-(defn score-and-sort-friends :- [m/Friend]
+(s/defn score-and-sort-friends :- [m/Friend]
   "Scores found tweets according to term frequencies in ref-tweets. Answers
    with a list of user details and scores. The returned list is sorted descending
    by the friend score."
