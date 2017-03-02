@@ -15,8 +15,6 @@ lein test :all
 ## Run Server
 Any of the following will do after the build step above.
 
-Navigate to http://localhost:9001
-
 ```shell
 API_KEY=${key} API_SECRET=${secret} java -jar ./target/twitter-friends-0.1.0-standalone.jar
 ```
@@ -24,6 +22,10 @@ API_KEY=${key} API_SECRET=${secret} java -jar ./target/twitter-friends-0.1.0-sta
 ```shell
 API_KEY=${key} API_SECRET=${secret} lein run
 ```
+
+UI: http://localhost:9001
+
+Swagger UI: http://localhost:9001/swagger
 
 ## Command Line
 
