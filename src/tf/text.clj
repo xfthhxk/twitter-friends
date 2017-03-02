@@ -12,7 +12,8 @@
 
 (defn text->words
   "Takes an input string s and splits the string on non-text, non-decimal digits. See:
-   http://stackoverflow.com/questions/1611979/remove-all-non-word-characters-from-a-string-in-java-leaving-accented-charact"
+   http://stackoverflow.com/questions/1611979/remove-all-non-word-characters-from-a-string-in-java-leaving-accented-charact
+   NB This is not great when there are URLs in the input text."
   [s]
   (str/split s #"[^\p{L}\p{Nd}]+"))
 

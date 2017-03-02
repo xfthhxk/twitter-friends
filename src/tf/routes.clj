@@ -8,6 +8,7 @@
             [e85th.backend.web :as web]
             [e85th.backend.middleware :as backend-mw]
             [tf.ui :as ui]
+            [tf.models :as m]
             [tf.core :as tf]
             [taoensso.timbre :as log]
             [schema.core :as s]))
@@ -33,7 +34,7 @@
     (GET "/friends" []
       :summary "For a given twitter handle get simliar users"
       :query-params [handle :- s/Str]
-      ;:return [m/Friend]
+      :return [m/Friend]
       (http-response/ok (tf/find-friends res handle)))))
 
 (defapi all-routes

@@ -7,19 +7,20 @@
             [clojure.string :as str]))
 
 
-(def word-frequencies
+(def ^{:doc "Word frequencies for a tweet's text."} word-frequencies
   (comp text/word-frequencies :text))
 
-(def term-frequencies
+(def ^{:doc "Term frequencies for a tweet's text."} term-frequencies
   (comp text/term-frequencies :text))
 
-(def user-handle
+(def ^{:doc "Extracts a tweet's user's handle."} user-handle
   (comp :screen_name :user))
 
-(def user-description
+(def ^{:doc "Extracts a tweet's user's description."} user-description
   (comp :description :user))
 
 (s/defn user-info
+  "Pulls out user info from a tweet and returns a map with the handle photo-url and twitter-page."
   [tweet]
   (let [{:keys [profile_image_url_https]} (get-in tweet [:user])
         handle (user-handle tweet)]
@@ -35,6 +36,7 @@
 
 
 (s/defn hashtag-frequencies :- {s/Str s/Int}
+  "Frequencies of hashtags in a tweet."
   [tweets]
   (->> (map hashtags tweets)
        flatten
@@ -47,10 +49,12 @@
   (u/group-by+ user-handle word-frequencies (partial apply merge-with +) tweets))
 
 (s/defn combined-term-frequencies :- {s/Str s/Num}
+  "Term frequencies for all words in all tweets."
   [tweets]
   (apply merge-with + (map term-frequencies tweets)))
 
 (s/defn combined-word-frequencies :- {s/Str s/Num}
+  "Word frequencies for all words in all tweets."
   [tweets]
   (apply merge-with + (map word-frequencies tweets)))
 

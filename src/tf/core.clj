@@ -16,11 +16,15 @@
 ;; for each user determine word-frequencies for all tweets
 
 (s/defn get-user-tweets
+  "Makes an API call to Twitter to fetch tweets (user timeline) for
+   the requested handle. Answers with the tweets."
   [{:keys [twitter-creds] :as res} handle :- s/Str]
   (let [result (twitter/statuses-user-timeline :oauth-creds twitter-creds :params {:screen-name handle})]
     (get-in result [:body])))
 
 (s/defn get-tweet-search-results
+  "Makes an API call to Twitter to find tweets that match the query string.
+   Answers with the tweets."
   [{:keys [twitter-creds] :as res} query :- s/Str]
   (let [result (twitter/search-tweets :oauth-creds twitter-creds :params {:q query})]
     (get-in result [:body :statuses])))
@@ -73,6 +77,23 @@
         words-search (some->> tweets tweet/top-words (take max-search-terms) search-clause delay)]
     (or tags-search @desc-search @words-search default-search-term)))
 
+(defn assoc-friend-score
+  "Inputs are both maps keyed by a user's handle."
+  [handle->user-info handle->score]
+  (reduce (fn [m [handle score]]
+            (assoc-in m [handle :twitter.user/friend-score] score))
+          handle->user-info
+          handle->score))
+
+(defn score-and-sort-friends :- [m/Friend]
+  "Scores found tweets according to term frequencies in ref-tweets. Answers
+   with a list of user details and scores. The returned list is sorted descending
+   by the friend score."
+  [ref-tweets found-tweets]
+  (let [handle->user-info (u/group-by+ tweet/user-handle tweet/user-info first found-tweets)
+        handle->score (score-search-results ref-tweets found-tweets)
+        handle->user-info (assoc-friend-score handle->user-info handle->score)]
+    (sort-by :twitter.user/friend-score > (vals handle->user-info))))
 
 ;; get messages for user with handle
 ;; find most relevant hashtags in tweets
@@ -90,12 +111,6 @@
   [{:keys [twitter-creds] :as res} handle :- s/Str]
   (let [tweets (get-user-tweets res handle)
         search-clause (build-search-clause tweets)
-        results (get-tweet-search-results res search-clause)
-        handle->user-info (u/group-by+ tweet/user-handle tweet/user-info first results)
-        handle->score (score-search-results tweets results)
-        handle->user-info (reduce (fn [m [handle score]]
-                                    (assoc-in m [handle :twitter.user/friend-score] score))
-                                  handle->user-info
-                                  handle->score)]
+        results (get-tweet-search-results res search-clause)]
     (log/infof "Handle: %s, search clause: %s" handle search-clause)
-    (sort-by :twitter.user/friend-score > (vals handle->user-info))))
+    (score-and-sort-friends tweets results)))

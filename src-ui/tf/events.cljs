@@ -13,7 +13,7 @@
   [{:keys [db] :as cofx} event-v]
   (log/warnf "rpc err: %s" event-v)
   {:db (assoc-in db dk/busy? false)
-   :notify [:alert {:message "Error fetching friends."}]})
+   :notify [:alert {:message "Error fetching friends. Is the handle correct?"}]})
 
 (def-event-db fetch-friends-ok
   [db [_ friends]]
