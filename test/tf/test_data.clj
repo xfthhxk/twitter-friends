@@ -105,3 +105,36 @@
    :favorite_count 0,
    :created_at "Wed Jul 17 01:33:13 +0000 2013",
    :text "Why I donated to @EFF: #NSA duh! https://t.co/GvdIhrltXh"})
+
+
+(def ref-tweets
+  [{:entities {:hashtags [{:text "NSA"}]}
+    :text "Such wow #NSA."}
+
+   {:entities {:hashtags [{:text "pizza"}]}
+    :text "Boy do I love #pizza!"}
+
+   {:entities {:hashtags [{:text "pizza"}
+                          {:text "gelato"}]}
+    :text "#Gelato and #pizza for dinner"}
+   {:text "Love hiking."}])
+
+(def found-tweets
+  [{:entities {:hashtags [{:text "NSA"}]}
+    :user {:screen_name "mary"}
+    :text "#NSA snooping."}
+
+   {:entities {:hashtags [{:text "pizza"}]}
+    :user {:screen_name "mary"}
+    :text "Good #pizza!"}
+
+   {:entities {:hashtags [{:text "pizza"}
+                          {:text "gelato"}]}
+    :user {:screen_name "john"}
+    :text "Love #pizza and #gelato."}
+
+   {:user {:screen_name "hiker42"}
+    :text "Italian gelato!"}
+
+   {:user {:screen_name "hiker42"}
+    :text "hiking fun"}])

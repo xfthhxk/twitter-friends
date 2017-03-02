@@ -9,11 +9,15 @@
 
 
 (defn config-val
-  [opts opts-key env-key]
+  [opts-key env-key opts]
   (or (get opts opts-key)
-      (get (System/getenv) env-key)
-      (throw (ex-info (format "No value specified for %s or env %s" opts-key env-key) {}))))
+      (get (System/getenv) env-key)))
 
+(def api-key
+  (partial config-val :api-key "API_KEY"))
+
+(def api-secret
+  (partial config-val :api-secret "API_SECRET"))
 
 (s/defn add-server-components
   "Adds server components "
@@ -29,8 +33,7 @@
    Starts with a base set of components and adds in other components based on the operation mode."
   [sys-config operation-mode :- s/Keyword opts]
   (let [base [:sys-config sys-config
-              :twitter-creds (oauth/make-oauth-creds (config-val opts :api-key "API_KEY")
-                                                     (config-val opts :api-secret "API_SECRET") )]
+              :twitter-creds (oauth/make-oauth-creds (api-key opts) (api-secret opts) )]
         f (get {:server add-server-components} operation-mode (constantly base))]
     (f sys-config base)))
 

@@ -17,14 +17,17 @@
   [s]
   (str/split s #"[^\p{L}\p{Nd}]+"))
 
-(def text-wo-stop-words
-  (comp (partial remove stop-words) text->words))
+(def ^{:doc "Input text is lower cased then some stop words are removed.
+             Response will be lower cased."}
+  text-wo-stop-words
+  (comp (partial remove stop-words) text->words str/lower-case))
 
-(def word-frequencies
+(def ^{:doc "Lowercased word frequencies."} word-frequencies
   (comp frequencies text-wo-stop-words))
 
 (s/defn term-frequencies :- {s/Str s/Num}
-  "Calculates the term frequency for each word. NB no stemming is taking place."
+  "Calculates the term frequency for each word. NB no stemming is taking place.
+   A term is a lower cased string token with some stop words removed."
   [s :- s/Str]
   (let [word->count (word-frequencies s)
         total-terms (count word->count)]

@@ -1,4 +1,5 @@
 (ns tf.core
+  "Main entry point for Twitter Friends functionality."
   (:require [tf.models :as m]
             [tf.tweet :as tweet]
             [tf.text :as text]
@@ -11,6 +12,9 @@
 ;; Twitter recommends: Limit your searches to 10 keywords and operators.
 (def max-search-terms 5)
 (def default-search-term "#friends")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Twitter API Calls
 
 (s/defn get-user-tweets
   "Makes an API call to Twitter to fetch tweets (user timeline) for
@@ -26,15 +30,42 @@
   (let [result (twitter/search-tweets :oauth-creds twitter-creds :params {:q query})]
     (get-in result [:body :statuses])))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Search Clauses
+
 (s/defn search-clause :- (s/maybe s/Str)
   ([words :- [s/Str]]
    (search-clause identity words))
   ([word-modifier-fn words :- [s/Str]]
-   (when (seq words)
-     (str/join " OR " (map word-modifier-fn words)))))
+   (some->> (seq words)
+            (map word-modifier-fn)
+            (str/join " OR " ))))
 
 (def hashtags-search-clause
   (partial search-clause (partial str "#")))
+
+(s/defn build-search-clause
+  "Uses the subject's tweets to build a search clause to find other
+   users who can be considered 'friends'.  The input tweets should all be
+   from the same user.  Tries to use hashtags for the search, but some
+   people don't use hashtags, so then falls back to using the subject's description,
+   and finally to words with the highest frequency in tweets.  The last option is
+   not prefereble because the stop words aren't exhaustive.  Subject's description is
+   useful, but may not capture sentiment.  Hashtags quite often capture sentiment and
+   are preferable."
+  [tweets]
+  (let [tweets (seq tweets)
+        tags-search (some->> tweets tweet/top-hashtags (take max-search-terms) hashtags-search-clause)
+        desc-search (delay (some->> tweets first tweet/user-description text/text-wo-stop-words (take max-search-terms) search-clause))
+        words-search (delay (some->> tweets tweet/top-words (take max-search-terms) search-clause))]
+
+    ;; using delays to avoid doing extra work if preferred options are usable
+    (or tags-search @desc-search @words-search default-search-term)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Scoring
 
 (s/defn score-word-frequencies :- s/Num
   "Generates a score for words that are keys in both input maps.
@@ -59,21 +90,6 @@
             {}
             handle->word->freq)))
 
-(s/defn build-search-clause
-  "Uses the subject's tweets to build a search clause to find other
-   users who can be considered 'friends'.  The input tweets should all be
-   from the same user.  Tries to use hashtags for the search, but some
-   people don't use hashtags, so then falls back to using the subject's description,
-   and finally to words with the highest frequency in tweets.  The last option is
-   not prefereble because the stop words aren't exhaustive.  Subject's description is
-   useful, but may not capture sentiment.  Hashtags quite often capture sentiment and
-   are preferable."
-  [tweets]
-  (let [tags-search (some->> tweets tweet/top-hashtags (take max-search-terms) hashtags-search-clause)
-        desc-search (some->> tweets first tweet/user-description text/text-wo-stop-words (take max-search-terms) search-clause delay)
-        words-search (some->> tweets tweet/top-words (take max-search-terms) search-clause delay)]
-    (or tags-search @desc-search @words-search default-search-term)))
-
 (defn assoc-friend-score
   "Inputs are both maps keyed by a user's handle."
   [handle->user-info handle->score]
@@ -92,11 +108,6 @@
         handle->user-info (assoc-friend-score handle->user-info handle->score)]
     (sort-by :twitter.user/friend-score > (vals handle->user-info))))
 
-;; get messages for user with handle
-;; find most relevant hashtags in tweets
-;; do search for top 5 hashtags using OR
-;; based on the tweets from search, assign a score
-;; sort by score
 (s/defn find-friends :- [m/Friend]
   "Gets messages by the passed in handle.
    Finds most relevant hashtags, user's description
@@ -106,6 +117,7 @@
    score order.  Higher score indicates more similarity and more
    likely to be 'friends'."
   [{:keys [twitter-creds] :as res} handle :- s/Str]
+  (log/infof "Find friends for handle: %s" handle)
   (let [tweets (get-user-tweets res handle)
         search-clause (build-search-clause tweets)
         results (get-tweet-search-results res search-clause)]

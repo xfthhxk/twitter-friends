@@ -6,12 +6,13 @@
             [e85th.commons.util :as u]
             [clojure.string :as str]))
 
+(def ^{:doc "Gets the tweet text"} text :text)
 
 (def ^{:doc "Word frequencies for a tweet's text."} word-frequencies
-  (comp text/word-frequencies :text))
+  (comp text/word-frequencies text))
 
 (def ^{:doc "Term frequencies for a tweet's text."} term-frequencies
-  (comp text/term-frequencies :text))
+  (comp text/term-frequencies text))
 
 (def ^{:doc "Extracts a tweet's user's handle."} user-handle
   (comp :screen_name :user))
@@ -51,12 +52,16 @@
 (s/defn combined-term-frequencies :- {s/Str s/Num}
   "Term frequencies for all words in all tweets."
   [tweets]
-  (apply merge-with + (map term-frequencies tweets)))
+  (if (seq tweets)
+    (apply merge-with + (map term-frequencies tweets))
+    {}))
 
 (s/defn combined-word-frequencies :- {s/Str s/Num}
   "Word frequencies for all words in all tweets."
   [tweets]
-  (apply merge-with + (map word-frequencies tweets)))
+  (if (seq tweets)
+    (apply merge-with + (map word-frequencies tweets))
+    {}))
 
 (s/defn top-hashtags
   "From a set of tweets extracts and returns the most popular hashtags in order."
@@ -68,6 +73,7 @@
 (s/defn top-words
   "From a set of tweets extract and returns the most popular words in order."
   [tweets]
-  (->> (combined-word-frequencies tweets)
-       (sort-by second >) ;; descending sort
-       (map first)))
+  (some->> tweets
+           combined-word-frequencies
+           (sort-by second >) ;; descending sort
+           (map first)))

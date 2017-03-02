@@ -1,6 +1,5 @@
 (ns tf.test-system
   (:require [com.stuartsierra.component :as component]
-            [e85th.commons.util :as u]
             [e85th.commons.components :as commons-comp]
             [schema.core :as s]
             [taoensso.timbre :as log]))

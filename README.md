@@ -1,48 +1,105 @@
 # twitter-friends
 
-"Twitter Friends"
+Identify other Twitter users who share some level of similarity.
 
-You will be developing a working Web site that allows your users to see a
-twitter user's "Twitter Friends". The "Twitter Friends" are defined here as
-two persons whose tweets are similar in content in some way. You are not
-asked to find the closest friends of a person, just a set of reasonably
-close friends that you can justify given the technical and resource
-constraints you are working with, which we expect you to be able to
-articulate.
+## Build
+```shell
+lein uberjar
+```
 
-On your site, when a user enters a person's twitter handle, your user
-expects to see the set of this person's friends, along with their twitter
-handles, profile pictures and the measures of closeness.  Feel free to
-improve the user experience in whatever ways you feel necessary given the
-time you have.
+## Run Tests
+```shell
+lein test :all
+```
 
-Your submission includes a link to the working Web site, a link (or
-attachment) to the source code, and a link (or attachment) to a document
-where you outline and justify your choices in design and implementation.
-You are free to use whatever tools, resources and libraries that you have a
-right to use.
+## Run Server
+Any of the following will do after the build step above.
 
-## Usage
+Navigate to http://localhost:9001
+
+```shell
+API_KEY=${key} API_SECRET=${secret} java -jar ./target/twitter-friends-0.1.0-SNAPSHOT-standalone.jar
+```
+
+```shell
+API_KEY=${key} API_SECRET=${secret} lein run
+```
+
+## Command Line
+
+```shell
+API_KEY=${key} API_SECRET=${secret} lein run --mode cli --handle xfthhxk
+```
+
+## Design
 
 A user's followers and people she follows are likely very similar.  However,
 the API has limits on data access so checking every follower is not possible.
-Get data using search.
+Instead, the following approach was taken:
+* Get the subject's timeline (most recent tweets)
+* Figure out terms relevant to the subject in order of preference
+  * Find most used hashtags
+  * Look at his/her own description
+  * Tabulate most frequent words in tweets
+  * Fallback: is the search for #friends
+* Submit most frequent terms to Twitter's search endpoint.
+* Score results
+  * Calculate word frequency by user
+  * Calculate subject's term frequency to act as a weight
+  * Sum the reuslt of multiplying corresponding word frequency and weight
+  * Higher score implies greater potential similarity.
+* Display matching users sorted by descending score (most relevant)
 
-TODO
-* Normalize scores between 0 and 1?
 
-FIXME
+The preference for hashtags is because the user is indicating what is
+important in the tweet and also because they seem to encode
+a perspective/sentiment. For example, #DeleteUber will better match
+users then just going off of text ie "uber".
 
-* People who don't use hashtags, need to look at user description
-* If no description look at most frequent words and search for that.
-* Duplicate users returned by twitter search, so aggregate them into score.
-* Handle exceptions for when the handle does not exist.
+I quickly noticed that some class of user's very rarely use hashtags. To handle
+this case, I looked to how a user describes himself/herself.
 
-lein run --env development --mode cli --handle xfthhxk
+As a fallback to lack of hashtags and no self description, the search is based
+off of most frequent words in tweets (removing stop words). The stop words could
+be larger, they are currently based off of Datomic's stop words.
+
+Without any other input, search happens via the #friends hashtag.
+
+## Implementation
+* The UI is a single page app based on re-frame.
+* The UI makes API calls to get the data and uses kioo templates to render the views.
+* The server exposes APIs which uses compojure-api and so Swagger API docs are available.
+* The application is also runnable from the command line.
+
+This project is simple enough to do with just a server side rendered UI. However, I already
+had a template project to work off of and generally I do prefer doing single page apps.
+UIs are full of state and it's easier to not lose it at every request.
+
+
+Choice in libraries:
+
+* compojure-api: Great for building documented APIs with an explorable UI
+* schema: Have not yet explored Spec in depth. Good for communicating/enforcing inputs/outputs.
+* re-frame: Well designed, lots of experience with it.
+* kioo: Prefer it to hiccup in most situations. Allows designers to just work with HTML and CSS.
+
+## Constraints
+* Twitter's API restricts non-paying consumers to a handful of
+  calls per endpoint per 15 minute period.
+* Twitter has an index of recent (at most 9 days) tweets available for search.
+
+
+## Issues Encountered
+* Not everyone uses hashtags.
+* Some accounts are private.
+* Some accounts have no tweets and no description.
+* Search can return tweets by same user need to merge scoring.
+* Results and scores change as new tweets come in.
+
 
 ## License
 
-Copyright © 2017 FIXME
+Copyright © 2017 Amar Mehta
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
