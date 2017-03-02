@@ -31,7 +31,7 @@
 
 (defsnippet friend-controls* "templates/ui/friends.html" [:.friend-controls]
   []
-  {[:.twitter-handle] (k/substitute [inputs/std-text subs/current-handle e/current-handle-changed])
+  {[:.twitter-handle] (k/substitute [inputs/std-text subs/current-handle e/current-handle-changed {:placeholder "Twitter Handle"}])
    [:.search-action] (k/substitute [inputs/button subs/busy? e/fetch-friends "Find Friends"])})
 
 (defsnippet friends-main "templates/ui/friends.html" [:.friends-main]

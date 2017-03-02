@@ -4,7 +4,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.9.473"]
+                 [org.clojure/clojurescript "1.9.229"]
                  [org.clojure/tools.cli "0.3.5"]
                  [com.taoensso/timbre "4.7.4"]
                  [e85th/commons "0.1.7"]
@@ -57,7 +57,8 @@
                                            :optimizations :none
                                            :pretty-print true
                                            :parallel-build true
-                                           :closure-defines {goog.DEBUG true}}}}}
+                                           :closure-defines {goog.DEBUG true}
+                                           :externs ["resources/externs/toastr.extern.js"]}}}}
   :figwheel {:css-dirs ["resources/public/css"]}
   :plugins [[com.jakemccrary/lein-test-refresh "0.10.0"]
             [codox "0.8.13"]

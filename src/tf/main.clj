@@ -79,6 +79,8 @@
     (cond
       (:help options) (u/exit 0 (usage summary))
       (:version options) (u/exit 0 (util/build-properties))
+      (not (:api-key options)) (u/exit 1 "API key is required.")
+      (not (:api-secret options)) (u/exit 1 "API secret is required.")
       errors (u/exit 1 (str "Errors parsing command:\n" (str/join \newline errors))))
 
     (log/infof "Twitter Friends started with options: %s." options)
