@@ -18,7 +18,7 @@ Any of the following will do after the build step above.
 Navigate to http://localhost:9001
 
 ```shell
-API_KEY=${key} API_SECRET=${secret} java -jar ./target/twitter-friends-0.1.0-SNAPSHOT-standalone.jar
+API_KEY=${key} API_SECRET=${secret} java -jar ./target/twitter-friends-0.1.0-standalone.jar
 ```
 
 ```shell
