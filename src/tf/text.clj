@@ -4,11 +4,11 @@
             [clojure.string :as str]))
 
 (def stop-words
-  #{ "a" "an" "and" "are" "as" "at"
-    "be" "but" "by" "for" "if" "in" "into" "is" "it"
+  #{ "" "a" "an" "and" "are" "as" "at"
+    "be" "but" "by" "can" "do" "for" "if" "in" "into" "is" "it"
     "no" "not" "of" "on" "or" "such"
     "that" "the" "their" "then" "there" "these" "they" "this" "to"
-    "was" "will" "with"})
+    "was" "why" "will" "with"})
 
 (defn text->words
   "Takes an input string s and splits the string on non-text, non-decimal digits. See:

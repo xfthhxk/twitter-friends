@@ -1,7 +1,6 @@
 (ns tf.core-test
   (:require [e85th.test.http :as http]
             [e85th.commons.util :as u]
-            [tf.common.conf :as conf]
             [tf.routes :as routes]
             [com.stuartsierra.component :as component]
             [tf.test-system :as test-system]
@@ -19,9 +18,8 @@
   []
   (u/set-utc-tz)
   (s/set-fn-validation! true)
-  (let [sys-config (conf/read-config config-file :test)]
-    (alter-var-root #'system (constantly (component/start (test-system/make sys-config))))
-    (http/init! {:routes (routes/make-handler (:app system))})))
+  (alter-var-root #'system (constantly (component/start (test-system/make {}))))
+  (http/init! {:routes (routes/make-handler (:app system))}))
 
 
 (def api-call (http/make-transit-api-caller))

@@ -11,5 +11,5 @@
   [:#init-component] (h/set-attr :value component-name))
 
 (defn index-page
-  [{:keys [version sys-config] :as res}]
+  [res]
   (apply str (index-page* "0.0.1" "main")))

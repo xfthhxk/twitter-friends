@@ -4,6 +4,7 @@
             [tf.subs :as subs]
             [tf.events :as e]
             [e85th.ui.rf.inputs :as inputs]
+            [goog.string :as gstr]
             [kioo.reagent :as k :refer-macros [defsnippet deftemplate]]))
 
 
@@ -17,7 +18,7 @@
    [:.friend-twitter-page] (k/set-attr :href twitter-page)
    [:.friend-handle] (k/content handle)
    [:.friend-profile-img] (k/set-attr :src photo-url)
-   [:.friend-score] (k/content friend-score)})
+   [:.friend-score] (k/content (gstr/format "%.2f" friend-score))})
 
 
 (defsnippet friend-list* "templates/ui/friends.html" [:.friend-list]

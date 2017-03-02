@@ -1,7 +1,7 @@
 (ns tf.tweet
+  "Deals with parsing a tweet or a seq of tweets obtained from the Twitter API."
   (:require [tf.models :as m]
             [tf.text :as text]
-            [twitter.api.restful :as twitter]
             [schema.core :as s]
             [e85th.commons.util :as u]
             [clojure.string :as str]))
@@ -27,9 +27,8 @@
      :twitter.user/photo-url profile_image_url_https
      :twitter.user/twitter-page (str "https://twitter.com/" handle)}))
 
-
-
 (s/defn hashtags :- [s/Str]
+  "Pulls out hashtags from a tweet."
   [tweet]
   (->> (get-in tweet [:entities :hashtags])
        (map :text)))
@@ -51,9 +50,20 @@
   [tweets]
   (apply merge-with + (map term-frequencies tweets)))
 
+(s/defn combined-word-frequencies :- {s/Str s/Num}
+  [tweets]
+  (apply merge-with + (map word-frequencies tweets)))
+
 (s/defn top-hashtags
   "From a set of tweets extracts and returns the most popular hashtags in order."
   [tweets]
   (->> (hashtag-frequencies tweets)
-       (sort-by (comp unchecked-negate-int second))
+       (sort-by second >) ;; descending sort
+       (map first)))
+
+(s/defn top-words
+  "From a set of tweets extract and returns the most popular words in order."
+  [tweets]
+  (->> (combined-word-frequencies tweets)
+       (sort-by second >) ;; descending sort
        (map first)))

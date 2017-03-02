@@ -7,12 +7,11 @@
                  [org.clojure/clojurescript "1.9.473"]
                  [org.clojure/tools.cli "0.3.5"]
                  [com.taoensso/timbre "4.7.4"]
-                 [e85th/commons "0.1.6"]
-                 [e85th/backend "0.1.16" :exclusions [[com.google.guava/guava-jdk5]]]
-                 [e85th/ui "0.1.14"]
+                 [e85th/commons "0.1.7"]
+                 [e85th/backend "0.1.17" :exclusions [[com.google.guava/guava-jdk5]]]
+                 [e85th/ui "0.1.15"]
                  [prismatic/schema "1.1.2"]
                  [twitter-api "1.8.0"]
-                 [com.twitter/twitter-text "1.6.1"]
 
                  [http-kit "2.2.0"]
 
@@ -27,7 +26,6 @@
                  [cljsjs/react-dom "15.3.1-0"]
 
                  [funcool/hodgepodge "0.1.4"] ;; local storage
-                 [aero "1.0.0"]
                  [kioo "0.4.2"]]
 
 

@@ -5,8 +5,7 @@
             [twitter.oauth :as oauth]
             [schema.core :as s]
             [tf.common.util :as util]
-            [tf.routes :as routes]
-            [tf.common.conf :as conf]))
+            [tf.routes :as routes]))
 
 
 
@@ -22,16 +21,13 @@
 (s/defn all-components
   "Answers with a seq of alternating keywords and components required for component/system-map.
    Starts with a base set of components and adds in other components based on the operation mode."
-  [sys-config operation-mode :- s/Keyword]
+  [sys-config operation-mode :- s/Keyword options-map]
   (let [base [:sys-config sys-config
-              :twitter-creds (oauth/make-oauth-creds (conf/twitter-api-key sys-config) (conf/twitter-api-secret sys-config))]
-        f (get {:server add-server-components
-                :standalone add-server-components}
-               operation-mode
-               (constantly base))]
+              :twitter-creds (oauth/make-oauth-creds (:api-key options-map) (:api-secret options-map))]
+        f (get {:server add-server-components} operation-mode (constantly base))]
     (f sys-config base)))
 
 (s/defn new-system
   "Creates a system."
-  [sys-config operation-mode :- s/Keyword]
-  (apply component/system-map (all-components sys-config operation-mode)))
+  [sys-config operation-mode :- s/Keyword options-map]
+  (apply component/system-map (all-components sys-config operation-mode options-map)))

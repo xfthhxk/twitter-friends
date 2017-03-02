@@ -9,7 +9,6 @@
             [e85th.backend.middleware :as backend-mw]
             [tf.ui :as ui]
             [tf.core :as tf]
-            [tf.common.conf :as conf]
             [taoensso.timbre :as log]
             [schema.core :as s]))
 
@@ -42,7 +41,7 @@
    :exceptions {:handlers {:compojure.api.exception/default backend-mw/error-actions}}
    :swagger {:ui "/swagger"
              :spec "/swagger.json"
-             :data {:info {:title "TF APIs"}}}}
+             :data {:info {:title "Twitter Friends APIs"}}}}
 
   ;; using var quote #' to facilitate changing route definitions during development
   (compojure-api/middleware

@@ -6,11 +6,3 @@
    :twitter.user/photo-url s/Str
    :twitter.user/twitter-page s/Str
    :twitter.user/friend-score s/Num})
-
-(s/defschema FriendInfo
-  {:user Friend
-   :tags #{s/Str}})
-
-
-(s/defschema HandleToFriendInfo
-  {s/Str FriendInfo})

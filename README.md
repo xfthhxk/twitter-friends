@@ -29,14 +29,16 @@ the API has limits on data access so checking every follower is not possible.
 Get data using search.
 
 TODO
-* Score results and order by them
+* Normalize scores between 0 and 1?
 
 FIXME
 
 * People who don't use hashtags, need to look at user description
 * If no description look at most frequent words and search for that.
-* Handle exceptions for when the handle does not exist.
 * Duplicate users returned by twitter search, so aggregate them into score.
+* Handle exceptions for when the handle does not exist.
+
+lein run --env development --mode cli --handle xfthhxk
 
 ## License
 
